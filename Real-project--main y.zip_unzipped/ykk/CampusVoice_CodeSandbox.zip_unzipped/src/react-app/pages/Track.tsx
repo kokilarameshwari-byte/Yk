@@ -59,7 +59,6 @@ export default function Track() {
   const [searchParams] = useSearchParams();
 
   const [trackingId, setTrackingId] = useState(searchParams.get("id") || "");
-
   const [complaint, setComplaint] = useState<Complaint | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -69,19 +68,17 @@ export default function Track() {
 
     setLoading(true);
     setError("");
+    setComplaint(null);
 
     try {
       const res = await fetch(`/api/complaints/${trackingId}`);
 
-      if (!res.ok) {
-        throw new Error("Complaint not found");
-      }
+      if (!res.ok) throw new Error();
 
       const data = await res.json();
       setComplaint(data);
-    } catch (err) {
+    } catch {
       setError("Complaint not found");
-      setComplaint(null);
     }
 
     setLoading(false);
@@ -92,9 +89,7 @@ export default function Track() {
 
     if (id) {
       setTrackingId(id);
-      setTimeout(() => {
-        handleSearch();
-      }, 200);
+      handleSearch();
     }
   }, [searchParams]);
 
@@ -104,12 +99,11 @@ export default function Track() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-      <Header />
+    <div className="min-h-screen bg-background text-foreground">
 
       <main className="max-w-3xl mx-auto px-4 py-20">
-        {/* SEARCH CARD */}
 
+        {/* SEARCH CARD */}
         <Card className="mb-8">
           <CardContent className="pt-6">
             <form onSubmit={handleSubmit} className="flex gap-3">
@@ -128,7 +122,6 @@ export default function Track() {
         </Card>
 
         {/* LOADING */}
-
         {loading && (
           <div className="text-center py-10">
             <Loader2 className="animate-spin mx-auto mb-2" />
@@ -137,7 +130,6 @@ export default function Track() {
         )}
 
         {/* ERROR */}
-
         {!loading && error && (
           <Card>
             <CardContent className="text-center py-10">
@@ -147,7 +139,6 @@ export default function Track() {
         )}
 
         {/* RESULT */}
-
         {!loading && complaint && (
           <Card className="shadow-xl border rounded-2xl">
             <CardHeader>
@@ -165,43 +156,26 @@ export default function Track() {
             </CardHeader>
 
             <CardContent className="space-y-5">
+
               {/* STATUS PROGRESS */}
               <div className="flex items-center justify-between mb-4">
-                <div className="flex flex-col items-center">
-                  <div
-                    className={`w-4 h-4 rounded-full ${
-                      complaint.status === "Submitted" ||
-                      complaint.status === "in-progress" ||
-                      complaint.status === "resolved"
-                        ? "bg-green-500"
-                        : "bg-gray-300"
-                    }`}
-                  />
-                  <p className="text-xs mt-1">Submitted</p>
-                </div>
-
-                <div className="flex flex-col items-center">
-                  <div
-                    className={`w-4 h-4 rounded-full ${
-                      complaint.status === "in-progress" ||
-                      complaint.status === "resolved"
-                        ? "bg-green-500"
-                        : "bg-gray-300"
-                    }`}
-                  />
-                  <p className="text-xs mt-1">In Progress</p>
-                </div>
-
-                <div className="flex flex-col items-center">
-                  <div
-                    className={`w-4 h-4 rounded-full ${
-                      complaint.status === "resolved"
-                        ? "bg-green-500"
-                        : "bg-gray-300"
-                    }`}
-                  />
-                  <p className="text-xs mt-1">Resolved</p>
-                </div>
+                {["Submitted", "in-progress", "resolved"].map((step) => (
+                  <div key={step} className="flex flex-col items-center">
+                    <div
+                      className={`w-4 h-4 rounded-full ${
+                        complaint.status === step ||
+                        (step === "Submitted" &&
+                          (complaint.status === "in-progress" ||
+                            complaint.status === "resolved"))
+                          ? "bg-green-500"
+                          : "bg-gray-300"
+                      }`}
+                    />
+                    <p className="text-xs mt-1">
+                      {statusConfig[step]?.label}
+                    </p>
+                  </div>
+                ))}
               </div>
 
               <p className="text-gray-700">{complaint.description}</p>
@@ -242,6 +216,7 @@ export default function Track() {
               <div className="p-4 bg-gray-50 rounded-lg">
                 {statusConfig[complaint.status]?.description}
               </div>
+
             </CardContent>
           </Card>
         )}

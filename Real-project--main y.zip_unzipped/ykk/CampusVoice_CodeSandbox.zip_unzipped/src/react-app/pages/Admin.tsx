@@ -29,29 +29,33 @@ export default function AdminPage() {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Check admin login
   useEffect(() => {
     const isAdmin = localStorage.getItem("admin");
+
     if (!isAdmin) {
       navigate("/admin-login");
     }
-  }, []);
+  }, [navigate]);
 
+  // Load complaints
   const loadComplaints = async () => {
     try {
       const res = await fetch("/api/complaints");
       const data = await res.json();
       setComplaints(data);
-    } catch {
+    } catch (err) {
       console.error("Error loading complaints");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   useEffect(() => {
     loadComplaints();
   }, []);
 
+  // Update complaint status
   const updateStatus = async (id: string, status: string) => {
     try {
       await fetch(`/api/admin/complaints/${id}`, {
@@ -68,6 +72,7 @@ export default function AdminPage() {
     }
   };
 
+  // Stats
   const total = complaints.length;
   const submitted = complaints.filter((c) => c.status === "Submitted").length;
   const inProgress = complaints.filter(
@@ -84,10 +89,11 @@ export default function AdminPage() {
   const COLORS = ["#facc15", "#3b82f6", "#10b981"];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
+    <div className="min-h-screen bg-background text-foreground">
 
       <main className="max-w-6xl mx-auto px-6 py-10">
+
+        {/* Dashboard Header */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
 
@@ -95,7 +101,7 @@ export default function AdminPage() {
             variant="destructive"
             onClick={() => {
               localStorage.removeItem("admin");
-              window.location.href = "/admin-login";
+              navigate("/admin-login");
             }}
           >
             Logout
@@ -168,7 +174,9 @@ export default function AdminPage() {
 
         {loading && <p>Loading complaints...</p>}
 
-        {!loading && complaints.length === 0 && <p>No complaints found</p>}
+        {!loading && complaints.length === 0 && (
+          <p>No complaints found</p>
+        )}
 
         {!loading &&
           complaints.map((c) => (
@@ -194,19 +202,30 @@ export default function AdminPage() {
                   <b>Location:</b> {c.location}
                 </p>
 
+                {/* Status Buttons */}
+
                 <div className="flex gap-3 mt-4">
-                  <Button onClick={() => updateStatus(c.id, "Submitted")}>
+                  <Button
+                    variant="secondary"
+                    onClick={() => updateStatus(c.id, "Submitted")}
+                  >
                     Pending
                   </Button>
 
-                  <Button onClick={() => updateStatus(c.id, "in-progress")}>
+                  <Button
+                    onClick={() => updateStatus(c.id, "in-progress")}
+                  >
                     In Progress
                   </Button>
 
-                  <Button onClick={() => updateStatus(c.id, "resolved")}>
+                  <Button
+                    className="bg-green-600 hover:bg-green-700"
+                    onClick={() => updateStatus(c.id, "resolved")}
+                  >
                     Resolved
                   </Button>
                 </div>
+
               </CardContent>
             </Card>
           ))}

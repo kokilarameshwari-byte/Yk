@@ -53,52 +53,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navbar */}
-
-      <div className="flex items-center justify-between px-6 py-4 bg-white shadow">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center text-white">
-            +
-          </div>
-
-          <h1 className="text-xl font-semibold">
-            Campus<span className="text-emerald-500">Voice</span>
-          </h1>
-        </div>
-
-        <div
-          className="text-2xl cursor-pointer"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          ☰
-        </div>
-      </div>
-
-      {menuOpen && (
-        <div className="bg-white shadow p-4 space-y-3">
-          <div
-            onClick={() => (window.location.href = "/")}
-            className="cursor-pointer"
-          >
-            Report Issue
-          </div>
-
-          <div
-            onClick={() => (window.location.href = "/track")}
-            className="cursor-pointer"
-          >
-            Track Status
-          </div>
-
-          <div
-            onClick={() => (window.location.href = "/admin")}
-            className="cursor-pointer"
-          >
-            Admin
-          </div>
-        </div>
-      )}
+    <div className="min-h-screen bg-background text-foreground">
 
       {/* Hero */}
 

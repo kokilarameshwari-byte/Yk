@@ -6,23 +6,30 @@ export default function Header() {
   const [darkMode, setDarkMode] = useState(false);
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const toggleTheme = () => {
-    setDarkMode((prev) => !prev);
-
-    useEffect(() => {
-      if (darkMode) {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
-    }, [darkMode]);
-  };
 
   const navLinks = [
     { path: "/", label: "Report Issue", icon: MessageSquarePlus },
     { path: "/track", label: "Track Status", icon: Search },
     { path: "/admin", label: "Admin", icon: Shield },
   ];
+  const toggleTheme = () => {
+  const html = document.documentElement;
+
+  if (html.classList.contains("dark")) {
+    html.classList.remove("dark");
+    localStorage.setItem("theme", "light");
+  } else {
+    html.classList.add("dark");
+    localStorage.setItem("theme", "dark");
+  }
+};
+useEffect(() => {
+  const savedTheme = localStorage.getItem("theme");
+
+  if (savedTheme === "dark") {
+    document.documentElement.classList.add("dark");
+  }
+}, []);
 
   return (
     <header className="bg-card border-b border-border sticky top-0 z-50 shadow-sm">
@@ -82,30 +89,42 @@ export default function Header() {
         </div>
 
         {/* Mobile Nav */}
-        {mobileMenuOpen && (
-          <nav className="md:hidden pb-4 border-t border-border pt-4">
-            {navLinks.map((link) => {
-              const Icon = link.icon;
-              const isActive = location.pathname === link.path;
-              return (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {link.label}
-                </Link>
-              );
-            })}
-          </nav>
-        )}
-      </div>
-    </header>
-  );
-}
+{mobileMenuOpen && (
+  <div className="md:hidden pb-4 border-t border-border pt-4 space-y-2">
+
+    {navLinks.map((link) => {
+      const Icon = link.icon;
+      const isActive = location.pathname === link.path;
+
+      return (
+        <Link
+          key={link.path}
+          to={link.path}
+          onClick={() => setMobileMenuOpen(false)}
+          className={`flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium ${
+            isActive
+              ? "bg-primary text-primary-foreground"
+              : "hover:bg-muted"
+          }`}
+        >
+          <Icon className="w-4 h-4" />
+          {link.label}
+        </Link>
+      );
+    })}
+
+    {/* Theme Toggle */}
+    <button
+      onClick={toggleTheme}
+      className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium hover:bg-muted w-full text-left"
+    >
+      {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+      Toggle Theme
+    </button>
+    </div>
+)}
+  
+</div>
+</header>
+  );}
+
