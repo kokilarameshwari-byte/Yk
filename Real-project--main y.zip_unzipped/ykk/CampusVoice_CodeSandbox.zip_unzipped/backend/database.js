@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS complaints (
   description TEXT,
   category TEXT,
   location TEXT,
-  status TEXT DEFAULT 'Submitted',
+  status TEXT,
   createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
 )
 `

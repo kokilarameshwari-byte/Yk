@@ -19,7 +19,7 @@ export default function Home() {
     }
 
     try {
-      const res = await fetch("/api/complaints", {
+      const res = await fetch("https://3c8mrl-3001.csb.app/api/complaints", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -34,11 +34,17 @@ export default function Home() {
 
       const data = await res.json();
 
+      if (!data.id) {
+        alert("Complaint ID not generated");
+        return;
+      }
+
+      // redirect to track page
       navigate(`/track?id=${data.id}`);
 
       setTitle("");
       setDescription("");
-    } catch {
+    } catch (err) {
       alert("Submission failed");
     }
   };
@@ -54,7 +60,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-
       {/* Hero */}
 
       <div className="text-center mt-10 px-6">

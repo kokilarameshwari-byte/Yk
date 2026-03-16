@@ -1,33 +1,43 @@
 import express from "express";
 import cors from "cors";
-import { randomUUID } from "crypto";
 import db from "./database.js";
 import complaintsRoute from "./routes/complaints.js";
 
 const app = express();
-app.use(cors());
+
+app.use(
+  cors({
+    origin: "*",
+  })
+);
+
 app.use(express.json());
+
 app.use("/api", complaintsRoute);
-
-// Get complaints
+// get all complaints
 app.get("/api/complaints", (req, res) => {
-  db.all("SELECT * FROM complaints", [], (err, rows) => {
-    if (err) {
-      return res.status(500).json(err);
-    }
+  try {
+    const rows = db.prepare("SELECT * FROM complaints").all();
     res.json(rows);
-  });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
-// Get single complaint
-app.get("/api/complaints/:id", (req, res) => {
-  const { id } = req.params;
 
-  db.get("SELECT * FROM complaints WHERE id = ?", [id], (err, row) => {
-    if (err) return res.status(500).json(err);
-    if (!row) return res.status(404).json({ error: "Complaint not found" });
+// get complaint by id
+app.get("/api/complaints/:id", (req, res) => {
+  try {
+    const { id } = req.params;
+    const row = db.prepare("SELECT * FROM complaints WHERE id = ?").get(id);
+
+    if (!row) {
+      return res.status(404).json({ error: "Complaint not found" });
+    }
 
     res.json(row);
-  });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // rate limit memory
@@ -40,53 +50,19 @@ const checkRate = (ip) => {
   return true;
 };
 
-// Create complaint
-app.post("/api/complaints", (req, res) => {
-  const { title, description, category, location } = req.body;
-
-  if (!title || !description || !category || !location) {
-    return res.status(400).json({ error: "Missing fields" });
-  }
-
-  if (title.length > 100 || description.length > 1000) {
-    return res.status(400).json({ error: "Input too long" });
-  }
-
-  db.run(
-    `INSERT INTO complaints (title, description, category, location)
-   VALUES (?, ?, ?, ?)`,
-    [title, description, category, location],
-    function (err) {
-      if (err) {
-        return res.status(500).json(err);
-      }
-
-      res.json({
-        id: this.lastID,
-        title,
-        description,
-        category,
-        location,
-        status: "Submitted",
-      });
-    }
-  );
-});
-
 // Admin update status
 app.patch("/api/admin/complaints/:id", (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
 
-  db.run(
-    "UPDATE complaints SET status = ? WHERE id = ?",
-    [status, id],
-    function (err) {
-      if (err) return res.status(500).json(err);
+    db.prepare("UPDATE complaints SET status = ? WHERE id = ?")
+      .run(status, id);
 
-      res.json({ message: "Status updated" });
-    }
-  );
+    res.json({ message: "Status updated" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.post("/api/logout", (_, res) => {
@@ -94,6 +70,7 @@ app.post("/api/logout", (_, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
+
 app.listen(PORT, () => {
   console.log("Server running on port", PORT);
 });

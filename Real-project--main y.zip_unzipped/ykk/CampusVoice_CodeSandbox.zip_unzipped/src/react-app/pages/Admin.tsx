@@ -41,7 +41,7 @@ export default function AdminPage() {
   // Load complaints
   const loadComplaints = async () => {
     try {
-      const res = await fetch("/api/complaints");
+      const res = await fetch("https://3c8mrl-3001.csb.app/api/complaints");
       const data = await res.json();
       setComplaints(data);
     } catch (err) {
@@ -90,9 +90,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-
       <main className="max-w-6xl mx-auto px-6 py-10">
-
         {/* Dashboard Header */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
@@ -174,9 +172,7 @@ export default function AdminPage() {
 
         {loading && <p>Loading complaints...</p>}
 
-        {!loading && complaints.length === 0 && (
-          <p>No complaints found</p>
-        )}
+        {!loading && complaints.length === 0 && <p>No complaints found</p>}
 
         {!loading &&
           complaints.map((c) => (
@@ -212,9 +208,7 @@ export default function AdminPage() {
                     Pending
                   </Button>
 
-                  <Button
-                    onClick={() => updateStatus(c.id, "in-progress")}
-                  >
+                  <Button onClick={() => updateStatus(c.id, "in-progress")}>
                     In Progress
                   </Button>
 
@@ -225,7 +219,6 @@ export default function AdminPage() {
                     Resolved
                   </Button>
                 </div>
-
               </CardContent>
             </Card>
           ))}

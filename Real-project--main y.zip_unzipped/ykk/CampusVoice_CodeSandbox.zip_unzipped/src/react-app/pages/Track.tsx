@@ -71,7 +71,7 @@ export default function Track() {
     setComplaint(null);
 
     try {
-      const res = await fetch(`/api/complaints/${trackingId}`);
+      const res = await fetch(`https://3c8mrl-3001.csb.app/api/complaints/${trackingId}`);
 
       if (!res.ok) throw new Error();
 
